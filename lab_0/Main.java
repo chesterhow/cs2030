@@ -1,9 +1,9 @@
 import java.util.Scanner;
 
 public class Main {
-  static Circle createCircle(Point p, Point q, double radius) {
+  public static Circle createCircle(Point p, Point q, double radius) {
     // Points are the same
-    if (p.getX() == q.getX() && p.getY() == q.getY()) {
+    if (p.equals(q)) {
       return null;
     }
 
