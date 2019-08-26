@@ -17,27 +17,27 @@ public class Point {
   public double distance(Point q) {
     double dx = this.x - q.x;
     double dy = this.y - q.y;
-	  return Math.sqrt(dx * dx + dy* dy);
+	  return Math.sqrt(dx * dx + dy * dy);
 	}
 
-  public Point midPoint(Point p) {
-    double midPointX = (this.x + p.x) / 2;
-    double midPointY = (this.y + p.y) / 2;
+  public Point midPoint(Point q) {
+    double midPointX = (this.x + q.x) / 2;
+    double midPointY = (this.y + q.y) / 2;
     return new Point(midPointX, midPointY);
   }
 
-  public double angleTo(Point p) {
+  public double angleTo(Point q) {
     // Points are the same
-    if (this.equals(p)) {
+    if (this.equals(q)) {
       return 0;
     }
 
-    double xDist = p.x - this.x;
-    double yDist = p.y - this.y;
+    double xDist = q.x - this.x;
+    double yDist = q.y - this.y;
 
     if (xDist == 0) {
       // Point is directly above
-      if (p.y > this.y) {
+      if (q.y > this.y) {
         return Math.PI / 2;
       // Point is directly below
       } else {
@@ -45,7 +45,7 @@ public class Point {
       }
     } else if (yDist == 0) {
       // Point is on the right
-      if (p.x > this.x) {
+      if (q.x > this.x) {
         return 0;
       // Point is on the left
       } else {
@@ -56,13 +56,13 @@ public class Point {
     double refAngle =  Math.atan(xDist/yDist);
 
     // Q1
-    if (p.x >= this.x && p.y >= this.y) {
+    if (q.x >= this.x && q.y >= this.y) {
       return refAngle;
     // Q2
-    } else if (p.x < this.x && p.y >= this.y) {
+    } else if (q.x < this.x && q.y >= this.y) {
       return Math.PI + refAngle;
     // Q3
-    } else if (p.x < this.x && p.y < this.y) {
+    } else if (q.x < this.x && q.y < this.y) {
       return refAngle - Math.PI;
     // Q4
     } else {
