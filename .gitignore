@@ -1,6 +1,7 @@
 # Test files
 *.in
 *.out
+*.html
 
 # Compiled class file
 *.class
