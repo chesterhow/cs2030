@@ -42,18 +42,24 @@ public class Main {
     }
 
     public static int discCoverage(Point p, Point q, Point[] points) {
-        int discs = 0;
+        int pqCircleCoverage = 0;
+        int qpCircleCoverage = 0;
 
         if (p.distance(q) <= 2) {
-            Circle c = createCircle(p, q, 1);
+            Circle pqCircle = createCircle(p, q, 1);
+            Circle qpCircle = createCircle(q, p, 1);
             for (Point point : points) {
-                if (isInside(c, point)) {
-                    discs++;
+                if (isInside(pqCircle, point)) {
+                    pqCircleCoverage++;
+                }
+
+                if (isInside(qpCircle, point)) {
+                    qpCircleCoverage++;
                 }
             }
         }
 
-        return discs;
+        return (pqCircleCoverage >= qpCircleCoverage) ? pqCircleCoverage : qpCircleCoverage;
     }
 
     public static void main(String[] args) {
@@ -61,7 +67,7 @@ public class Main {
         Point[] points = readPoints(sc);
         int max = 0;
 
-        for (int i = 0; i < points.length; i++) {
+        for (int i = 0; i < points.length - 1; i++) {
             for (int j = i + 1; j < points.length; j++) {
                 int dc = discCoverage(points[i], points[j], points);
                 if (dc > max) {
