@@ -1,4 +1,5 @@
 # Test files
+*.jsh
 *.in
 *.out
 *.html
