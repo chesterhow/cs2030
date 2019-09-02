@@ -1,8 +1,8 @@
 public class Cruise {
     protected final String id;
     protected final int arrival;
-    protected int loaders = 1;
-    protected int loadTime = 30;
+    protected static final int LOADERS = 1;
+    protected static final int LOAD_TIME = 30;
 
     public Cruise(String id, int arrival) {
         this.id = id;
@@ -14,11 +14,11 @@ public class Cruise {
     }
 
     public int getNumLoadersRequired() {
-        return this.loaders;
+        return this.LOADERS;
     }
 
     public int getServiceCompletionTime() {
-        return getArrivalTime() + this.loadTime;
+        return getArrivalTime() + this.LOAD_TIME;
     }
 
     @Override
