@@ -10,7 +10,7 @@ public class Face implements Cloneable {
         
         for (int i = 0; i < this.grid.length; i++) {
             for (int j = 0; j < this.grid[i].length; j++) {
-                rightGrid[i][j] = this.grid[2-j][i];
+                rightGrid[i][j] = this.grid[2 - j][i];
             }
         }
 
@@ -22,7 +22,7 @@ public class Face implements Cloneable {
 
         for (int i = 0; i < this.grid.length; i++) {
             for (int j = 0; j < this.grid[i].length; j++) {
-                leftGrid[i][j] = this.grid[j][2-i];
+                leftGrid[i][j] = this.grid[j][2 - i];
             }
         }
 

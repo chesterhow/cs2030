@@ -15,7 +15,7 @@ public class Dice implements SideViewable {
         String front = newSides[1];
 
         for (int i = 1; i < 4; i++) {
-            newSides[i] = newSides[i+1];
+            newSides[i] = newSides[i + 1];
         }
 
         newSides[4] = front;
@@ -29,7 +29,7 @@ public class Dice implements SideViewable {
         String left = newSides[4];
 
         for (int i = 4; i > 1; i--) {
-            newSides[i] = newSides[i-1];
+            newSides[i] = newSides[i - 1];
         }
 
         newSides[1] = left;

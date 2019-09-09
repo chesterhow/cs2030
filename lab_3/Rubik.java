@@ -232,7 +232,9 @@ public class Rubik implements Cloneable, SideViewable {
         String output = "";
 
         for (int i = 0; i < faceGridA.length; i++) {
-            output += getValuesInRow(faceGridA, i) + getValuesInRow(faceGridB, i) + getValuesInRow(faceGridC, i);
+            output += getValuesInRow(faceGridA, i) +
+                getValuesInRow(faceGridB, i) +
+                getValuesInRow(faceGridC, i);
             output += "\n";
         }
 
@@ -241,14 +243,13 @@ public class Rubik implements Cloneable, SideViewable {
 
     @Override
     public String toString() {
-        String filler = "......";
         String output = "\n";
         
         for (int i = 0; i < this.grid.length; i++) {
             if (i < 1 || i > 3) {
                 output += singleFace(this.grid[i]);
             } else if (i == 1) {
-                output += threeFaces(this.grid[i], this.grid[i+1], this.grid[i+2]);
+                output += threeFaces(this.grid[i], this.grid[i + 1], this.grid[i + 2]);
             }
         }
 

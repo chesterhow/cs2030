@@ -21,10 +21,8 @@ public class Main {
     public static Rubik executeTurns(Rubik rubik, Scanner sc) {
         while (sc.hasNext()) {
             String command = sc.next();
-            Rubik side = rubik;
+            Rubik side;
             switch (command.substring(0, 1)) {
-                case "F":
-                    break;
                 case "R":
                     side = new RubikRight(rubik);
                     break;
@@ -40,6 +38,8 @@ public class Main {
                 case "D":
                     side = new RubikDown(rubik);
                     break;
+                default:
+                    side = rubik;
             }
 
             if (command.contains("'")) {
