@@ -47,11 +47,23 @@ public class Menu {
         int price = 0;
 
         for (int id : ids) {
+            boolean found = false;
+
             for (List<Food> itemsOfType : this.itemsByType) {
                 for (Food item : itemsOfType) {
                     if (item.getId() == id) {
                         itemsInCombo.add(item);
                         price += item.getPrice();
+                        found = true;
+                    }
+                }
+            }
+
+            if (!found) {
+                for (Combo combo : this.combos) {
+                    if (combo.getId() == id) {
+                        itemsInCombo.add(combo);
+                        price += combo.getPrice();
                     }
                 }
             }
