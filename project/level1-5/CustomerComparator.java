@@ -10,6 +10,10 @@ public class CustomerComparator implements Comparator<Customer> {
         } else {
             if (c2.getState() == State.DONE) {
                 return 1;
+            } else if (c1.getState() == State.DONE) {
+                return -1;
+            } else if (c2.getState() == State.SERVED) {
+                return 1;
             } else {
                 return -1;
             }
