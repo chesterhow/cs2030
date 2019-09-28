@@ -3,11 +3,24 @@ public class Event {
     private Customer customer;
     private Server server;
 
+    /**
+     * Initialises a new Event that involves only a customer.
+     *
+     * @param eventTime the time of the event
+     * @param customer the customer involved in the event
+     */
     public Event(double eventTime, Customer customer) {
         this.eventTime = eventTime;
         this.customer = customer;
     }
 
+    /**
+     * Initialises a new Event that involves both a customer and a server.
+     *
+     * @param eventTime the time of the event
+     * @param customer the customer involved in the event
+     * @param server the server involved in the event
+     */
     public Event(double eventTime, Customer customer, Server server) {
         this.eventTime = eventTime;
         this.customer = customer;

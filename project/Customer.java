@@ -5,11 +5,20 @@ public class Customer {
     private final double arrivalTime;
     private State state;
 
+    /**
+     * Initialises a new Customer.
+     *
+     * @param arrivalTime the customer's time of arrival
+     */
     public Customer(double arrivalTime) {
         Customer.numCustomers++;
         this.id = Customer.numCustomers;
         this.arrivalTime = arrivalTime;
         this.state = State.ARRIVES;
+    }
+
+    public int getId() {
+        return this.id;
     }
 
     public double getArrivalTime() {

@@ -10,19 +10,11 @@ public class EventComparator implements Comparator<Event> {
         } else {
             Customer c1 = e1.getCustomer();
             Customer c2 = e2.getCustomer();
-
-            // Check if either are DONE
-            if (c1.getState() == State.DONE) {
-                return -1;
-            } else if (c2.getState() == State.DONE) {
+            
+            if (c1.getId() > c2.getId()) {
                 return 1;
             } else {
-                // Neither are done. Check if either are SERVED
-                if (c1.getState() == State.SERVED) {
-                    return -1;
-                } else {
-                    return 1;
-                }
+                return -1;
             }
         }
     }
