@@ -27,6 +27,7 @@ public class Farm {
                 System.out.println(dog + " was created");
                 break;
             case "cat":
+                checkArgumentsValid(5, args.length);
                 Animal cat = new Cat(args[2], Integer.parseInt(args[3]), args[4]);
                 animalsList.add(cat);
                 Collections.sort(animalsList);

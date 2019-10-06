@@ -1,4 +1,4 @@
-public abstract class Animal implements Comparable<Animal>{
+public abstract class Animal implements Comparable<Animal> {
     protected final String name;
     protected final int appetite;
     protected final String sound;

@@ -8,6 +8,6 @@ public class Chocolate extends Food {
 
     @Override
     public String toString() {
-        return this.brand + " " + this.flavour + " Chocolate";
+        return this.brand + " " + this.flavour + " chocolate";
     }
 }

@@ -5,6 +5,6 @@ public class Tuna extends Food {
 
     @Override
     public String toString() {
-        return this.brand + " Tuna";
+        return this.brand + " tuna";
     }
 }

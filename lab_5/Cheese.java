@@ -5,6 +5,6 @@ public class Cheese extends Food {
 
     @Override
     public String toString() {
-        return this.brand + " Cheese";
+        return this.brand + " cheese";
     }
 }
