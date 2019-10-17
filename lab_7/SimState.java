@@ -260,15 +260,11 @@ public class SimState {
      * @return The final state of the simulation.
      */
     public SimState run() {
-        Pair<Optional<Event>, SimState> p = nextEvent();
+        Pair<Optional<Event>, SimState> pair = nextEvent();
 
-        p = Stream.iterate(
-                p,
-                pair -> pair.first.isPresent(),
-                pair -> pair.first.get().simulate(pair.second).nextEvent()
-            ).reduce((first, second) -> second).get();
-
-        return p.first.get().simulate(p.second).nextEvent().second;
+        return Stream.iterate(pair,p -> p.first.get().simulate(p.second).nextEvent())
+            .dropWhile(p -> p.first.isPresent())
+            .findFirst().get().second;
     }
 
     /**

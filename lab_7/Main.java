@@ -55,18 +55,12 @@ class Main {
 
             currState = Stream.iterate(
                     currState,
-                    s -> processedArrivals.size() < numArrivals + 1,
                     s -> {
-                        if (arrivalTimes.isEmpty()) {
-                            processedArrivals.add(0.0);
-                            return s;
-                        } else {
-                            double time = arrivalTimes.remove(0);
-                            processedArrivals.add(time);
-                            return s.addEvent(time, state -> state.simulateArrival(time));
-                        }
+                        double time = arrivalTimes.remove(0);
+                        return s.addEvent(time, state -> state.simulateArrival(time));
                     }
-                ).reduce((first, second) -> second).get();
+                ).dropWhile(s -> !arrivalTimes.isEmpty())
+                .findFirst().get();
         }
 
         return currState;
