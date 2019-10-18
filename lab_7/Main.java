@@ -44,12 +44,11 @@ class Main {
         SimState currState = new SimState(numOfServers);
 
         if (scanner.hasNextDouble()) {
-            List<Double> arrivalTimes = Stream.iterate(
-                    scanner.nextDouble(),
-                    i -> i >= 0,
-                    i -> scanner.hasNextDouble() ? scanner.nextDouble() : -1
-                ).collect(Collectors.toList());
-
+            List<Double> arrivalTimes = scanner.useDelimiter("\n")
+                .tokens()
+                .map(i -> Double.parseDouble(i))
+                .collect(Collectors.toList());
+        
             int numArrivals = arrivalTimes.size();
             List<Double> processedArrivals = new ArrayList<>();
 
