@@ -1,3 +1,5 @@
+package cs2030.mystream;
+
 import java.util.List;
 import java.util.ArrayList;
 import java.util.function.Function;
@@ -73,7 +75,6 @@ public class InfiniteListImpl<T> implements InfiniteList<T> {
         while (!list.isEmptyList()) {
             if (list.head.get().isPresent()) {
                 array.add(list.head.get().get());
-            } else {
             }
             
             list = list.tail.get();
@@ -89,6 +90,7 @@ public class InfiniteListImpl<T> implements InfiniteList<T> {
         
         return new InfiniteListImpl<T>(this.head, () -> {
             InfiniteListImpl<T> myTail = this.tail.get();
+
             if (myTail.isEmptyList()) {
                 return myTail;
             } else {
@@ -143,6 +145,24 @@ public class InfiniteListImpl<T> implements InfiniteList<T> {
         }
 
         return value;
+    }
+
+    public InfiniteListImpl<T> takeWhile(Predicate<? super T> predicate) {
+        if (this.head.get().isPresent()) {
+            if (!predicate.test(this.head.get().get())) {
+                return new EmptyList<T>();
+            }
+        }
+
+        return new InfiniteListImpl<T>(this.head, () -> {
+            InfiniteListImpl<T> myTail = this.tail.get();
+
+            if (myTail.isEmptyList()) {
+                return myTail;
+            } else {
+                return myTail.takeWhile(predicate);
+            }
+        });
     }
 
     public boolean isEmptyList() {

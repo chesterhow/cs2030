@@ -1,3 +1,5 @@
+package cs2030.mystream;
+
 import java.util.function.Supplier;
 
 public class MySupplier<T> {
