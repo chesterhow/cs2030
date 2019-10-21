@@ -4,6 +4,8 @@ import java.util.function.Function;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.function.Predicate;
+import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
 import java.util.Optional;
 
 public class InfiniteListImpl<T> implements InfiniteList<T> {
@@ -93,6 +95,54 @@ public class InfiniteListImpl<T> implements InfiniteList<T> {
                 return myTail.limit(n - (this.head.get().isPresent() ? 1 : 0));
             }
         });
+    }
+
+    public long count() {
+        InfiniteListImpl<T> list = this;
+        long counter = 0;
+
+        while (!list.isEmptyList()) {
+            if (list.head.get().isPresent()) {
+                counter++;
+            }
+            list = list.tail.get();
+        }
+
+        return counter;
+    }
+
+    public Optional<T> reduce(BinaryOperator<T> accumulator) {
+        Optional<T> value = Optional.empty();
+        InfiniteListImpl<T> list = this;
+
+        while (!list.isEmptyList()) {
+            if (list.head.get().isPresent()) {
+                if (value.isEmpty()) {
+                    value = list.head.get();
+                } else {
+                    value = Optional.of(accumulator.apply(value.get(), list.head.get().get()));
+                }
+            }
+            
+            list = list.tail.get();
+        }
+
+        return value;
+    }
+
+    public <U> U reduce(U identity, BiFunction<U, ? super T, U> accumulator) {
+        U value = identity;
+        InfiniteListImpl<T> list = this;
+
+        while (!list.isEmptyList()) {
+            if (list.head.get().isPresent()) {
+                value = accumulator.apply(value, list.head.get().get());
+            }
+
+            list = list.tail.get();
+        }
+
+        return value;
     }
 
     public boolean isEmptyList() {
