@@ -24,9 +24,14 @@ public class InfiniteListImpl<T> implements InfiniteList<T> {
         this.tail = new MySupplier<InfiniteListImpl<T>>(tail);
     }
 
+    protected InfiniteListImpl(MySupplier<Optional<T>> head) {
+        this.head = head;
+        this.tail = new MySupplier<InfiniteListImpl<T>>(() -> new EmptyList<T>());
+    }
+
     public static <T> InfiniteListImpl<T> generate(Supplier<? extends T> s) {
         return new InfiniteListImpl<T>(
-                () -> Optional.of(s.get()),
+                () ->Optional.of(s.get()),
                 () -> InfiniteListImpl.generate(s)
             );
     }
@@ -86,6 +91,8 @@ public class InfiniteListImpl<T> implements InfiniteList<T> {
     public InfiniteListImpl<T> limit(long n) {
         if (n <= 0) {
             return new EmptyList<T>();
+        } else if (n == 1 && this.head.get().isPresent()) {
+            return new InfiniteListImpl<T>(this.head, () -> new EmptyList<T>());
         }
         
         return new InfiniteListImpl<T>(this.head, () -> {
@@ -148,20 +155,28 @@ public class InfiniteListImpl<T> implements InfiniteList<T> {
     }
 
     public InfiniteListImpl<T> takeWhile(Predicate<? super T> predicate) {
-        if (this.head.get().isPresent()) {
-            if (!predicate.test(this.head.get().get())) {
-                return new EmptyList<T>();
+        MySupplier<Boolean> predcateCheck = new MySupplier<>(() -> predicate.test(this.head.get().get()));
+
+        return new InfiniteListImpl<T>(() -> {
+            if (this.head.get().isPresent()) {
+                if (predcateCheck.get()) {
+                    return this.head.get();
+                }
             }
-        }
+            return Optional.empty();
+        }, () -> {
+            if (this.head.get().isPresent()) {
+                if (!predcateCheck.get()) {
+                    return new EmptyList<T>();
+                }
+            }
 
-        return new InfiniteListImpl<T>(this.head, () -> {
             InfiniteListImpl<T> myTail = this.tail.get();
-
             if (myTail.isEmptyList()) {
                 return myTail;
-            } else {
-                return myTail.takeWhile(predicate);
             }
+
+            return myTail.takeWhile(predicate);
         });
     }
 
