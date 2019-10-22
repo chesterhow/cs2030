@@ -31,16 +31,16 @@ public class InfiniteListImpl<T> implements InfiniteList<T> {
 
     public static <T> InfiniteListImpl<T> generate(Supplier<? extends T> s) {
         return new InfiniteListImpl<T>(
-                () ->Optional.of(s.get()),
-                () -> InfiniteListImpl.generate(s)
-            );
+            () -> Optional.of(s.get()),
+            () -> InfiniteListImpl.generate(s)
+        );
     }
 
     public static <T> InfiniteListImpl<T> iterate(T seed, Function<? super T, ? extends T> next) {
         return new InfiniteListImpl<T>(
-                () -> Optional.of(seed),
-                () -> InfiniteListImpl.iterate(next.apply(seed), next)
-            );
+            () -> Optional.of(seed),
+            () -> InfiniteListImpl.iterate(next.apply(seed), next)
+        );
     }
 
     public InfiniteListImpl<T> get() {
@@ -52,16 +52,16 @@ public class InfiniteListImpl<T> implements InfiniteList<T> {
 
     public <R> InfiniteListImpl<R> map(Function<? super T, ? extends R> mapper) {
         return new InfiniteListImpl<R>(
-                () -> head.get().map(mapper),
-                () -> tail.get().map(mapper)
-            );
+            () -> head.get().map(mapper),
+            () -> tail.get().map(mapper)
+        );
     }
 
     public InfiniteListImpl<T> filter(Predicate<? super T> predicate) {
         return new InfiniteListImpl<T>(
-                () -> head.get().filter(predicate),
-                () -> tail.get().filter(predicate)
-            );
+            () -> head.get().filter(predicate),
+            () -> tail.get().filter(predicate)
+        );
     }
 
     public void forEach(Consumer<? super T> action) {
@@ -155,7 +155,9 @@ public class InfiniteListImpl<T> implements InfiniteList<T> {
     }
 
     public InfiniteListImpl<T> takeWhile(Predicate<? super T> predicate) {
-        MySupplier<Boolean> predcateCheck = new MySupplier<>(() -> predicate.test(this.head.get().get()));
+        MySupplier<Boolean> predcateCheck = new MySupplier<>(
+            () -> predicate.test(this.head.get().get())
+        );
 
         return new InfiniteListImpl<T>(() -> {
             if (this.head.get().isPresent()) {
@@ -163,6 +165,7 @@ public class InfiniteListImpl<T> implements InfiniteList<T> {
                     return this.head.get();
                 }
             }
+            
             return Optional.empty();
         }, () -> {
             if (this.head.get().isPresent()) {
