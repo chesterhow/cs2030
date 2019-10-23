@@ -89,13 +89,17 @@ public class InfiniteListImpl<T> implements InfiniteList<T> {
     }
 
     public InfiniteListImpl<T> limit(long n) {
-        if (n <= 0) {
-            return new EmptyList<T>();
-        } else if (n == 1 && this.head.get().isPresent()) {
-            return new InfiniteListImpl<T>(this.head, () -> new EmptyList<T>());
-        }
-        
-        return new InfiniteListImpl<T>(this.head, () -> {
+        return new InfiniteListImpl<T>(() -> {
+            if (n <= 0) {
+                return Optional.empty();
+            }
+
+            return this.head.get();
+        }, () -> {
+            if (n <= 0 || (n == 1 && this.head.get().isPresent())) {
+                return new EmptyList<T>();
+            }
+            
             InfiniteListImpl<T> myTail = this.tail.get();
 
             if (myTail.isEmptyList()) {
@@ -114,6 +118,7 @@ public class InfiniteListImpl<T> implements InfiniteList<T> {
             if (list.head.get().isPresent()) {
                 counter++;
             }
+ 
             list = list.tail.get();
         }
 
@@ -175,6 +180,7 @@ public class InfiniteListImpl<T> implements InfiniteList<T> {
             }
 
             InfiniteListImpl<T> myTail = this.tail.get();
+
             if (myTail.isEmptyList()) {
                 return myTail;
             }
