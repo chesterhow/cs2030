@@ -2,6 +2,7 @@ package cs2030.simulator;
 
 import java.util.Optional;
 import java.util.stream.Stream;
+
 import java.util.function.Function;
 
 /**
@@ -74,6 +75,8 @@ public class SimState {
   /** The customer id. */
   private final int lastCustomerId;
 
+  private final double restingProbability;
+
   private final RandomGenerator rng;
 
   /**
@@ -84,12 +87,13 @@ public class SimState {
    * @param  log A log of what's happened so far.
    */
   private SimState(Shop shop, Statistics stats, PriorityQueue<Event> events,
-      String log, int lastCustomerId, RandomGenerator rng) {
+      String log, int lastCustomerId, double restingProbability, RandomGenerator rng) {
     this.shop = shop;
     this.stats = stats;
     this.events = events;
     this.log = log;
     this.lastCustomerId = lastCustomerId;
+    this.restingProbability = restingProbability;
     this.rng = rng;
   }
 
@@ -97,12 +101,13 @@ public class SimState {
    * Constructor for creating the simulation state from scratch.
    * @param numOfServers The number of servers.
    */
-  public SimState(int numOfServers, int maxQueueLength, int seed, double arrivalRate, double serviceRate) {
+  public SimState(int numOfServers, int maxQueueLength, int seed, double arrivalRate,
+      double serviceRate, double restingRate, double restingProbability) {
     this(new Shop(numOfServers, maxQueueLength),
         new Statistics(),
         new PriorityQueue<Event>(),
-        "", 1,
-        new RandomGenerator(seed, arrivalRate, serviceRate, 0));
+        "", 1, restingProbability,
+        new RandomGenerator(seed, arrivalRate, serviceRate, restingRate));
   }
 
   /**
@@ -111,7 +116,8 @@ public class SimState {
    * @return The new simulation state.
    */
   private SimState stats(Statistics stats) {
-    return new SimState(this.shop, stats, this.events, this.log, this.lastCustomerId, this.rng);
+    return new SimState(this.shop, stats, this.events, this.log,
+        this.lastCustomerId, this.restingProbability, this.rng);
   }
 
   /**
@@ -121,7 +127,7 @@ public class SimState {
    */
   private SimState server(Server s) {
     return new SimState(shop.replace(s), this.stats, this.events, this.log, 
-        this.lastCustomerId, this.rng);
+        this.lastCustomerId, this.restingProbability, this.rng);
   }
 
   /**
@@ -130,7 +136,8 @@ public class SimState {
    * @return The new simulation state.
    */
   private SimState events(PriorityQueue<Event> pq) {
-    return new SimState(this.shop, this.stats, pq, this.log, this.lastCustomerId, this.rng);
+    return new SimState(this.shop, this.stats, pq, this.log,
+        this.lastCustomerId, this.restingProbability,this.rng);
   }
 
   /**
@@ -139,7 +146,8 @@ public class SimState {
    * @return The new simulation state.
    */
   private SimState log(String s) {
-    return new SimState(this.shop, this.stats, this.events, this.log + s, this.lastCustomerId, this.rng);
+    return new SimState(this.shop, this.stats, this.events, this.log + s,
+        this.lastCustomerId,this.restingProbability, this.rng);
   }
 
   /**
@@ -148,7 +156,8 @@ public class SimState {
    * @return The new simulation state.
    */
   private SimState id(int id) {
-    return new SimState(this.shop, this.stats, this.events, this.log, id, this.rng);
+    return new SimState(this.shop, this.stats, this.events, this.log,
+        id, this.restingProbability, this.rng);
   }
 
   /**
@@ -269,7 +278,7 @@ public class SimState {
    * @return A new state of the simulation.
    */
   private SimState processArrival(double time, Customer customer) {
-    return shop.find(server -> server.isIdle())
+    return shop.find(server -> server.isIdle() && !server.isResting())
       .map(server -> serveCustomer(time, server, customer))
       .or(() -> shop
           .find(server -> !server.queueFull())
@@ -287,6 +296,11 @@ public class SimState {
    * @return A new state of the simulation.
    */
   public SimState simulateDone(double time, Server server, Customer customer) {
+    if (this.rng.genRandomRest() < this.restingProbability) {
+      return noteDone(time, server, customer)
+        .restServer(time, server);
+    }
+
     return shop.find(s -> s.equals(server))
       .flatMap(s -> s.getNextWaitingCustomer())
       .map(nextCustomer -> noteDone(time, server, customer).serveCustomer(time, server, nextCustomer))
@@ -306,6 +320,20 @@ public class SimState {
     return server(server.serve(customer))
       .noteServed(time, server, customer)
       .addEvent(doneTime, state -> state.simulateDone(doneTime, server, customer));
+  }
+
+  public SimState restServer(double time, Server server) {
+    double restEndTime = time + this.rng.genRestPeriod();
+    return server(server.makeIdle())
+      .server(server.makeRest())
+      .addEvent(restEndTime, state -> state.endServerRest(restEndTime, server));
+  }
+
+  public SimState endServerRest(double time, Server server) {
+    return shop.find(s -> s.equals(server))
+      .flatMap(s -> s.getNextWaitingCustomer())
+      .map(nextCustomer -> server(server.endRest()).serveCustomer(time, server, nextCustomer))
+      .orElseGet(() -> server(server.endRest()));
   }
 
   /**

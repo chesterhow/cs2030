@@ -24,8 +24,10 @@ class Main {
     int numOfCustomers = scanner.nextInt();
     double arrivalRate = scanner.nextDouble();
     double serviceRate = scanner.nextDouble();
+    double restingRate = scanner.nextDouble();
+    double restingProbability = scanner.nextDouble();
 
-    SimState state = new SimState(numOfServers, maxQueueLength, seed, arrivalRate, serviceRate);
+    SimState state = new SimState(numOfServers, maxQueueLength, seed, arrivalRate, serviceRate, restingRate, restingProbability);
     return state.generateArrivals(numOfCustomers);
   }
 

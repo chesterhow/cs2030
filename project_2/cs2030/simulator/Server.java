@@ -24,6 +24,8 @@ class Server {
   /** The customer currently waiting, if any. */
   private Queue<Customer> waitingCustomers;
 
+  private boolean isResting;
+
   /**
    * Creates a server and initalizes it with a unique id.
    */
@@ -32,17 +34,19 @@ class Server {
     this.maxQueueLength = maxQueueLength;
     this.currentCustomer = Optional.empty();
     this.waitingCustomers = new LinkedList<Customer>();
+    this.isResting = false;
   }
 
   /**
    * Private constructor for a server.
    */
   private Server(int id, int maxQueueLength, Optional<Customer> currentCustomer,
-      Queue<Customer> waitingCustomers) {
+      Queue<Customer> waitingCustomers, boolean isResting) {
     this.id = id;
     this.maxQueueLength = maxQueueLength;
     this.currentCustomer = currentCustomer;
     this.waitingCustomers = waitingCustomers;
+    this.isResting = isResting;
   }
 
   /**
@@ -50,7 +54,8 @@ class Server {
    * @return A new server with the current customer removed.
    */
   public Server makeIdle() {
-    return new Server(this.id, this.maxQueueLength, Optional.empty(), this.waitingCustomers);
+    return new Server(this.id, this.maxQueueLength, Optional.empty(),
+        this.waitingCustomers, this.isResting);
   }
 
   /**
@@ -63,6 +68,20 @@ class Server {
 
   public boolean queueFull() {
     return this.waitingCustomers.size() >= this.maxQueueLength;
+  }
+
+  public boolean isResting() {
+    return this.isResting;
+  }
+
+  public Server makeRest() {
+    return new Server(this.id, this.maxQueueLength, this.currentCustomer,
+        this.waitingCustomers, true);
+  }
+
+  public Server endRest() {
+    return new Server(this.id, this.maxQueueLength, this.currentCustomer,
+        this.waitingCustomers, false);
   }
 
   /**
@@ -78,7 +97,6 @@ class Server {
    * @return customer waiting for given server.
    */
   public Optional<Customer> getNextWaitingCustomer() {
-    // System.out.println(this.waitingCustomers.peek());
     return Optional.ofNullable(this.waitingCustomers.peek());
   }
 
@@ -91,9 +109,11 @@ class Server {
     Optional<Customer> nextWaitingCustomer = Optional.ofNullable(this.waitingCustomers.poll());
 
     if (nextWaitingCustomer.filter(c -> c.equals(customer)).isEmpty()) {
-      return new Server(this.id, this.maxQueueLength, Optional.of(customer), this.waitingCustomers);
+      return new Server(this.id, this.maxQueueLength, Optional.of(customer),
+          this.waitingCustomers, this.isResting);
     } else {
-      return new Server(this.id, this.maxQueueLength, nextWaitingCustomer, this.waitingCustomers);
+      return new Server(this.id, this.maxQueueLength, nextWaitingCustomer,
+          this.waitingCustomers, this.isResting);
     }
   }
 
@@ -104,7 +124,8 @@ class Server {
    */
   public Server askToWait(Customer customer) {
     this.waitingCustomers.add(customer);
-    return new Server(this.id, this.maxQueueLength, this.currentCustomer, this.waitingCustomers);
+    return new Server(this.id, this.maxQueueLength, this.currentCustomer,
+        this.waitingCustomers, this.isResting);
   }
 
   /**
