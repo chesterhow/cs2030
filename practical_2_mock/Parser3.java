@@ -2,6 +2,7 @@ import java.util.List;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 public class Parser {
     private List<String> lines;
@@ -34,6 +35,29 @@ public class Parser {
         }
 
         return new Parser(List.of(words));
+    }
+
+    public Parser grab(String str) {
+        List<String> lines = this.lines.stream()
+            .filter(line -> line.contains(str))
+            .collect(Collectors.toList());
+
+        return new Parser(lines);
+    }
+
+    public Parser echo() {
+        String result = "";
+        
+        for (String line : this.lines) {
+            if (!line.isBlank()) {
+                result += Stream.of(line.split(" "))
+                    .filter(word -> !word.isEmpty())
+                    .map(word -> word.trim())
+                    .reduce("", (first, second) -> first + " " + second);
+            }
+        }
+
+        return new Parser(List.of(result.trim()));
     }
 
     @Override
