@@ -1,8 +1,6 @@
 import java.time.Instant;
 import java.time.Duration;
 import java.util.Scanner;
-import java.util.concurrent.CompletionException;
-import java.util.concurrent.ExecutionException;
 import java.io.FileReader;
 import java.io.FileNotFoundException;
 
@@ -31,13 +29,11 @@ public class Main {
                 System.out.println(
                     BusSg.findBusServicesBetween(srcId, searchString)
                         .description()
-                        .get());
+                        .join());
             }
             sc.close();
         } catch (FileNotFoundException exception) {
             System.err.println("Unable to open file " + args[0] + " " + exception);
-        } catch (ExecutionException | InterruptedException e) {
-            throw new CompletionException(e);
         }
 
         Instant stop = Instant.now();
