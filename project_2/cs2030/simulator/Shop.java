@@ -22,11 +22,21 @@ class Shop {
    * Create a new shop with a given number of servers.
    * @param numOfServers The number of servers.
    */
-  Shop(int numOfServers, int maxQueueLength) {
+  Shop(int numOfServers, int numOfCounters, int maxQueueLength) {
     this.servers = Stream.iterate(1, i -> i + 1)
-      .map(i -> new Server(i, maxQueueLength))
-      .limit(numOfServers)
+      .map(i -> {
+        if (i <= numOfServers) {
+          return new HumanServer(i, maxQueueLength);
+        } else {
+          return new SelfCheckout(i, maxQueueLength);
+        }
+      })
+      .limit(numOfServers + numOfCounters)
       .collect(Collectors.toList());
+    
+    // if (numOfCounters > 0) {
+    //   this.servers.add(new SelfCheckout(numOfServers + 1, maxQueueLength, numOfCounters));
+    // }
   }
 
   /**
@@ -56,8 +66,7 @@ class Shop {
     return new Shop(
         servers.stream()
             .map(s -> (s.equals(server) ? server : s))
-            .collect(Collectors.toList())
-            );
+            .collect(Collectors.toList()));
   }
 
   /**

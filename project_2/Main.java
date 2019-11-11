@@ -20,6 +20,7 @@ class Main {
   public static SimState initSimState(Scanner scanner) {
     int seed = scanner.nextInt();
     int numOfServers = scanner.nextInt();
+    int numOfCounters = scanner.nextInt();
     int maxQueueLength = scanner.nextInt();
     int numOfCustomers = scanner.nextInt();
     double arrivalRate = scanner.nextDouble();
@@ -27,7 +28,7 @@ class Main {
     double restingRate = scanner.nextDouble();
     double restingProbability = scanner.nextDouble();
 
-    SimState state = new SimState(numOfServers, maxQueueLength, seed, arrivalRate, serviceRate, restingRate, restingProbability);
+    SimState state = new SimState(seed, numOfServers, numOfCounters, maxQueueLength, arrivalRate, serviceRate, restingRate, restingProbability);
     return state.generateArrivals(numOfCustomers);
   }
 

@@ -1,7 +1,5 @@
 package cs2030.simulator;
 
-import java.util.Queue;
-import java.util.LinkedList;
 import java.util.Optional;
 
 /**
@@ -12,121 +10,68 @@ import java.util.Optional;
  * @author atharvjoshi
  * @version CS2030 AY19/20 Sem 1 Lab 7
  */
-class Server {
+abstract class Server {
   /** The unique ID of this server. */
-  private final int id;
+  protected final int id;
 
-  private final int maxQueueLength;
+  protected final int maxQueueLength;
 
-  /** The ustomer currently being served, if any. */
-  private Optional<Customer> currentCustomer;
-
-  /** The customer currently waiting, if any. */
-  private Queue<Customer> waitingCustomers;
-
-  private boolean isResting;
+  protected Optional<Customer> currentCustomer;
 
   /**
    * Creates a server and initalizes it with a unique id.
    */
-  public Server(int id, int maxQueueLength) {
+  protected Server(int id, int maxQueueLength) {
     this.id = id;
     this.maxQueueLength = maxQueueLength;
     this.currentCustomer = Optional.empty();
-    this.waitingCustomers = new LinkedList<Customer>();
-    this.isResting = false;
   }
 
-  /**
-   * Private constructor for a server.
-   */
-  private Server(int id, int maxQueueLength, Optional<Customer> currentCustomer,
-      Queue<Customer> waitingCustomers, boolean isResting) {
+  protected Server(int id, int maxQueueLength, Optional<Customer> currentCustomer) {
     this.id = id;
     this.maxQueueLength = maxQueueLength;
     this.currentCustomer = currentCustomer;
-    this.waitingCustomers = waitingCustomers;
-    this.isResting = isResting;
-  }
-
-  /**
-   * Change this server's state to idle by removing its current customer.
-   * @return A new server with the current customer removed.
-   */
-  public Server makeIdle() {
-    return new Server(this.id, this.maxQueueLength, Optional.empty(),
-        this.waitingCustomers, this.isResting);
   }
 
   /**
    * Checks if the current server is idle.
    * @return true if the server is idle (no current customer); false otherwise.
    */
-  public boolean isIdle() {
-    return !this.currentCustomer.isPresent();
-  }
-
-  public boolean queueFull() {
-    return this.waitingCustomers.size() >= this.maxQueueLength;
-  }
-
-  public boolean isResting() {
-    return this.isResting;
-  }
-
-  public Server makeRest() {
-    return new Server(this.id, this.maxQueueLength, this.currentCustomer,
-        this.waitingCustomers, true);
-  }
-
-  public Server endRest() {
-    return new Server(this.id, this.maxQueueLength, this.currentCustomer,
-        this.waitingCustomers, false);
-  }
-
-  /**
-   * Checks if there is a customer waiting for given server.
-   * @return true if a customer is waiting for given server; false otherwise.
-   */
-  public boolean hasWaitingCustomer() {
-    return Optional.ofNullable(this.waitingCustomers.peek()).isPresent();
-  }
-
-  /**
-   * Returns waiting customer for given server.
-   * @return customer waiting for given server.
-   */
-  public Optional<Customer> getNextWaitingCustomer() {
-    return Optional.ofNullable(this.waitingCustomers.peek());
-  }
+  public abstract boolean isAvailable();
 
   /**
    * Serve a customer.
    * @param customer The customer to be served.
    * @return The new server serving this customer.
    */
-  public Server serve(Customer customer) {
-    Optional<Customer> nextWaitingCustomer = Optional.ofNullable(this.waitingCustomers.poll());
+  public abstract Server serve(Customer customer);
 
-    if (nextWaitingCustomer.filter(c -> c.equals(customer)).isEmpty()) {
-      return new Server(this.id, this.maxQueueLength, Optional.of(customer),
-          this.waitingCustomers, this.isResting);
-    } else {
-      return new Server(this.id, this.maxQueueLength, nextWaitingCustomer,
-          this.waitingCustomers, this.isResting);
-    }
-  }
+  /**
+   * Change this server's state to idle by removing its current customer.
+   * @return A new server with the current customer removed.
+   */
+  public abstract Server removeCustomer(Customer customer);
 
   /**
    * Make a customer wait for this server.
    * @param customer The customer who will wait for this server.
    * @return The new server with a waiting customer.
    */
-  public Server askToWait(Customer customer) {
-    this.waitingCustomers.add(customer);
-    return new Server(this.id, this.maxQueueLength, this.currentCustomer,
-        this.waitingCustomers, this.isResting);
-  }
+  public abstract Server askToWait(Customer customer);
+
+  public abstract boolean queueFull();
+
+  /**
+   * Checks if there is a customer waiting for given server.
+   * @return true if a customer is waiting for given server; false otherwise.
+   */
+  public abstract boolean hasWaitingCustomer();
+
+  /**
+   * Returns waiting customer for given server.
+   * @return customer waiting for given server.
+   */
+  public abstract Optional<Customer> getNextWaitingCustomer();
 
   /**
    * Return a string representation of this server.
@@ -135,7 +80,6 @@ class Server {
    */
   public String toString() {
     return "server " + Integer.toString(this.id);
-    // return "" + this.id + " (Q: " + waitingCustomer.map(c -> c.toString()).orElse("-") + ")";
   }
 
   /**

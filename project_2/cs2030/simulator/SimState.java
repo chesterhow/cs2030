@@ -101,9 +101,8 @@ public class SimState {
    * Constructor for creating the simulation state from scratch.
    * @param numOfServers The number of servers.
    */
-  public SimState(int numOfServers, int maxQueueLength, int seed, double arrivalRate,
-      double serviceRate, double restingRate, double restingProbability) {
-    this(new Shop(numOfServers, maxQueueLength),
+  public SimState(int seed, int numOfServers, int numOfCounters, int maxQueueLength, double arrivalRate, double serviceRate, double restingRate, double restingProbability) {
+    this(new Shop(numOfServers, numOfCounters, maxQueueLength),
         new Statistics(),
         new PriorityQueue<Event>(),
         "", 1, restingProbability,
@@ -256,6 +255,14 @@ public class SimState {
       .stats(stats.looseOneCustomer());
   }
 
+  public SimState noteBreak(double time, Server server) {
+    return log(String.format("%.3f %s takes a break\n", time, server));
+  }
+
+  public SimState noteClockIn(double time, Server server) {
+    return log(String.format("%.3f %s clocks in\n", time, server));
+  }
+
   /**
    * Simulates the logic of what happened when a customer arrives.
    * The customer is either served, waiting to be served, or leaves.
@@ -278,7 +285,7 @@ public class SimState {
    * @return A new state of the simulation.
    */
   private SimState processArrival(double time, Customer customer) {
-    return shop.find(server -> server.isIdle() && !server.isResting())
+    return shop.find(server -> server.isAvailable())
       .map(server -> serveCustomer(time, server, customer))
       .or(() -> shop
           .find(server -> !server.queueFull())
@@ -296,15 +303,20 @@ public class SimState {
    * @return A new state of the simulation.
    */
   public SimState simulateDone(double time, Server server, Customer customer) {
-    if (this.rng.genRandomRest() < this.restingProbability) {
-      return noteDone(time, server, customer)
-        .restServer(time, server);
+    if (server instanceof HumanServer) {
+      if (this.rng.genRandomRest() < this.restingProbability) {
+        return noteDone(time, server, customer)
+          // .noteBreak(time, server)
+          .restServer(time, (HumanServer)server, customer);
+      }
     }
 
     return shop.find(s -> s.equals(server))
       .flatMap(s -> s.getNextWaitingCustomer())
-      .map(nextCustomer -> noteDone(time, server, customer).serveCustomer(time, server, nextCustomer))
-      .orElseGet(() -> noteDone(time, server, customer).server(server.makeIdle()));
+      .map(nextCustomer -> noteDone(time, server, customer)
+        .serveCustomer(time, server, nextCustomer))
+      .orElseGet(() -> noteDone(time, server, customer)
+        .server(server.removeCustomer(customer)));
   }
 
   /**
@@ -322,14 +334,16 @@ public class SimState {
       .addEvent(doneTime, state -> state.simulateDone(doneTime, server, customer));
   }
 
-  public SimState restServer(double time, Server server) {
+  public SimState restServer(double time, HumanServer server, Customer customer) {
     double restEndTime = time + this.rng.genRestPeriod();
-    return server(server.makeIdle())
+    return server(server.removeCustomer(customer))
       .server(server.makeRest())
-      .addEvent(restEndTime, state -> state.endServerRest(restEndTime, server));
+      .addEvent(restEndTime, state -> state
+        // .noteClockIn(restEndTime, server)
+        .endServerRest(restEndTime, server));
   }
 
-  public SimState endServerRest(double time, Server server) {
+  public SimState endServerRest(double time, HumanServer server) {
     return shop.find(s -> s.equals(server))
       .flatMap(s -> s.getNextWaitingCustomer())
       .map(nextCustomer -> server(server.endRest()).serveCustomer(time, server, nextCustomer))
