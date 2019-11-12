@@ -10,20 +10,20 @@ import java.util.function.Predicate;
 /**
  * A shop object maintains the list of servers and support queries for server.
  *
- * @author weitsang
- * @author atharvjoshi
- * @version CS2030 AY19/20 Sem 1 Lab 7
+ * @version CS2030 AY19/20 Sem 1 DES+
  */
-class Shop {
+public class Shop {
     /** List of servers. */
     private final List<Server> servers;
 
     /**
-     * Create a new shop with a given number of servers.
+     * Create and initialize a Shop.
      * 
-     * @param numOfServers The number of servers.
+     * @param numOfServers   The number of servers.
+     * @param numOfCounters  The number of self-checkout counters.
+     * @param maxQueueLength The max length of each server's queue.
      */
-    Shop(int numOfServers, int numOfCounters, int maxQueueLength) {
+    public Shop(int numOfServers, int numOfCounters, int maxQueueLength) {
         this.servers = Stream.iterate(1, i -> i + 1)
             .map(i -> (i <= numOfServers) ?
                 new HumanServer(i, maxQueueLength) :
@@ -33,9 +33,11 @@ class Shop {
     }
 
     /**
-     * Constructor for updated shop.
+     * Private constructor for Shop.
+     * 
+     * @param servers The list of servers.
      */
-    Shop(List<Server> servers) {
+    private Shop(List<Server> servers) {
         this.servers = servers;
     }
 
@@ -52,6 +54,12 @@ class Shop {
             .findFirst();
     }
 
+    /**
+     * Find the server with the shortest queue.
+     * 
+     * @return Optional.empty if all servers' queues are full, or the optional of
+     *         the server with the shortest queue.
+     */
     public Optional<Server> findShortestQueue() {
         return this.servers.stream()
             .filter(server -> !server.queueFull())
@@ -59,7 +67,10 @@ class Shop {
     }
 
     /**
-     * Returns a new shop when one of the server changes its state.
+     * Replace the given server and return a new shop.
+     * 
+     * @param server The server to be replaced.
+     * @return The new shop with the updated list of servers.
      */
     public Shop replace(Server server) {
         return new Shop(servers.stream()

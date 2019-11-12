@@ -4,12 +4,24 @@ import java.util.Queue;
 import java.util.Optional;
 import java.util.LinkedList;
 
-class HumanServer extends Server {
+/**
+ * The HumanServer class inherits from the abstract Server class. Maintains a queue of waiting
+ * customers and is able to rest.
+ * 
+ * @version CS2030 AY19/20 Sem 1 DES+
+ */
+public class HumanServer extends Server {
+    /** The queue of waiting customers for this server. */
     private Queue<Customer> waitingCustomers;
+
+    /** Boolean indicating if this server is resting. */
     private boolean isResting;
 
     /**
-     * Creates a server and initalizes it with a unique id.
+     * Create and initalize a HumanServer.
+     * 
+     * @param id             The unique ID of this server.
+     * @param maxQueueLength The max length of this server's queue.
      */
     public HumanServer(int id, int maxQueueLength) {
         super(id, maxQueueLength);
@@ -18,7 +30,13 @@ class HumanServer extends Server {
     }
 
     /**
-     * Private constructor for a server.
+     * Private constructor for a HumanServer.
+     * 
+     * @param id               The unique ID of this server.
+     * @param maxQueueLength   The max length of this server's queue.
+     * @param currentCustomer  The current customer being served.
+     * @param waitingCustomers The queue of waiting customers.
+     * @param isResting        Boolean indicating if this server is resting.
      */
     private HumanServer(int id, int maxQueueLength, Optional<Customer> currentCustomer,
             Queue<Customer> waitingCustomers, boolean isResting) {
@@ -28,9 +46,9 @@ class HumanServer extends Server {
     }
 
     /**
-     * Checks if the current server is idle.
+     * Check if this server is has no current customer and is not resting.
      * 
-     * @return true if the server is idle (no current customer); false otherwise.
+     * @return Boolean indicating if this server is available.
      */
     @Override
     public boolean isAvailable() {
@@ -53,7 +71,7 @@ class HumanServer extends Server {
     }
 
     /**
-     * Change this server's state to idle by removing its current customer.
+     * Complete service and remove current customer.
      * 
      * @return A new server with the current customer removed.
      */
@@ -64,10 +82,10 @@ class HumanServer extends Server {
     }
 
     /**
-     * Make a customer wait for this server.
+     * Add customer to this server's queue.
      * 
-     * @param customer The customer who will wait for this server.
-     * @return The new server with a waiting customer.
+     * @param customer The customer who will join this server's queue.
+     * @return The new server with customer added to the queue.
      */
     @Override
     public HumanServer askToWait(Customer customer) {
@@ -76,31 +94,61 @@ class HumanServer extends Server {
             this.currentCustomer, this.waitingCustomers, this.isResting);
     }
 
+    /**
+     * Check if this server's queue is full.
+     * 
+     * @return Boolean indicating if this server's queue is full. 
+     */
     @Override
     public boolean queueFull() {
         return this.waitingCustomers.size() >= this.maxQueueLength;
     }
 
+    /**
+     * Return the current length of this server's queue.
+     * 
+     * @return The current length of this server's queue.
+     */
     @Override
     public int queueLength() {
         return this.waitingCustomers.size();
     }
 
+    /**
+     * Check if there is a customer waiting for given server.
+     * 
+     * @return Boolean indicating if there is a customer waiting for given server.
+     */
     @Override
     public boolean hasWaitingCustomer() {
         return Optional.ofNullable(this.waitingCustomers.peek()).isPresent();
     }
 
+    /**
+     * Return next waiting customer in this server's queue (if any).
+     * 
+     * @return Next waiting customer in this server's queue.
+     */
     @Override
     public Optional<Customer> getNextWaitingCustomer() {
         return Optional.ofNullable(this.waitingCustomers.peek());
     }
 
+    /**
+     * Make server rest.
+     * 
+     * @return The new server which is resting.
+     */
     public HumanServer makeRest() {
         return new HumanServer(this.id, this.maxQueueLength,
             this.currentCustomer, this.waitingCustomers, true);
     }
 
+    /**
+     * End server rest.
+     * 
+     * @return The new server which is not resting.
+     */
     public HumanServer endRest() {
         return new HumanServer(this.id, this.maxQueueLength,
             this.currentCustomer, this.waitingCustomers, false);

@@ -3,23 +3,25 @@ package cs2030.simulator;
 import java.util.Optional;
 
 /**
- * The Server class keeps track of who is the customer being served (if any) and
- * who is the customer waiting to be served (if any).
+ * The abstract Server class keeps track of the current customer being served (if any).
  *
- * @author weitsang
- * @author atharvjoshi
- * @version CS2030 AY19/20 Sem 1 Lab 7
+ * @version CS2030 AY19/20 Sem 1 DES+
  */
-abstract class Server {
+public abstract class Server {
     /** The unique ID of this server. */
     protected final int id;
 
+    /** The max length of this server's queue */
     protected final int maxQueueLength;
 
+    /** The current customer being served */
     protected Optional<Customer> currentCustomer;
 
     /**
-     * Creates a server and initalizes it with a unique id.
+     * Create and initialize a server.
+     * 
+     * @param id             The unique ID of this server.
+     * @param maxQueueLength The max length of this server's queue.
      */
     protected Server(int id, int maxQueueLength) {
         this.id = id;
@@ -27,6 +29,13 @@ abstract class Server {
         this.currentCustomer = Optional.empty();
     }
 
+    /**
+     * Create and initialize a server with a current customer.
+     * 
+     * @param id              The unique ID of this server.
+     * @param maxQueueLength  The max length of this server's queue.
+     * @param currentCustomer The current customer being served.
+     */
     protected Server(int id, int maxQueueLength, Optional<Customer> currentCustomer) {
         this.id = id;
         this.maxQueueLength = maxQueueLength;
@@ -34,9 +43,9 @@ abstract class Server {
     }
 
     /**
-     * Checks if the current server is idle.
+     * Check if this server is available.
      * 
-     * @return true if the server is idle (no current customer); false otherwise.
+     * @return Boolean indicating if this server is available.
      */
     public abstract boolean isAvailable();
 
@@ -49,53 +58,62 @@ abstract class Server {
     public abstract Server serve(Customer customer);
 
     /**
-     * Change this server's state to idle by removing its current customer.
+     * Complete service and remove current customer.
      * 
      * @return A new server with the current customer removed.
      */
     public abstract Server removeCustomer(Customer customer);
 
     /**
-     * Make a customer wait for this server.
+     * Add customer to this server's queue.
      * 
-     * @param customer The customer who will wait for this server.
-     * @return The new server with a waiting customer.
+     * @param customer The customer who will join this server's queue.
+     * @return The new server with customer added to the queue.
      */
     public abstract Server askToWait(Customer customer);
 
+    /**
+     * Check if this server's queue is full.
+     * 
+     * @return Boolean indicating if this server's queue is full. 
+     */
     public abstract boolean queueFull();
 
+    /**
+     * Return the current length of this server's queue.
+     * 
+     * @return The current length of this server's queue.
+     */
     public abstract int queueLength();
 
     /**
-     * Checks if there is a customer waiting for given server.
+     * Check if there is a customer waiting for given server.
      * 
-     * @return true if a customer is waiting for given server; false otherwise.
+     * @return Boolean indicating if there is a customer waiting for given server.
      */
     public abstract boolean hasWaitingCustomer();
 
     /**
-     * Returns waiting customer for given server.
+     * Return next waiting customer in this server's queue (if any).
      * 
-     * @return customer waiting for given server.
+     * @return Next waiting customer in this server's queue.
      */
     public abstract Optional<Customer> getNextWaitingCustomer();
 
     /**
      * Return a string representation of this server.
      * 
-     * @return A string S followed by the ID of the server, followed by the waiting
-     *         customer.
+     * @return The string "server" followed by the ID of the server.
      */
     public String toString() {
         return "server " + Integer.toString(this.id);
     }
 
     /**
-     * Checks if two servers have the same id.
+     * Check if two servers have the same ID.
      * 
-     * @param obj Another objects to compared against.
-     * @return true if obj is a server with the same id; false otherwise.
+     * @param obj Another object to be compared against.
+     * @return Boolean indicating if other server has the same ID.
      */
     public boolean equals(Object obj) {
         if (!(obj instanceof Server)) {
@@ -107,7 +125,7 @@ abstract class Server {
     /**
      * Return the hashcode for this server.
      * 
-     * @return the ID of this server as its hashcode.
+     * @return The ID of this server as its hashcode.
      */
     public int hashCode() {
         return this.id;

@@ -6,16 +6,16 @@ import java.io.FileReader;
 import java.io.FileNotFoundException;
 
 /**
- * The LabOFourB class is the entry point into Lab 4b.
+ * The Main class is the entry point into DES+.
  *
- * @author atharvjoshi
- * @version CS2030 AY19/20 Sem 1 Lab 7
+ * @version CS2030 AY19/20 Sem 1 DES+
  */
-class Main {
+public class Main {
     /**
-     * Read from inputs, populate the simulator with events, and run.
+     * Read from inputs, populate the simulator with arrival events.
      *
      * @param scanner The scanner to read inputs from.
+     * @return A new simulation state.
      */
     public static SimState initSimState(Scanner scanner) {
         int seed = scanner.nextInt();
@@ -45,8 +45,7 @@ class Main {
      */
     private static Optional<Scanner> createScanner(String[] args) {
         try {
-            // Read from stdin if no filename is given, otherwise read from the
-            // given file.
+            // Read from stdin if no filename is given, otherwise read from the given file.
             if (args.length == 0) {
                 // If there is no argument, read from standard input.
                 return Optional.of(new Scanner(System.in));
@@ -62,12 +61,10 @@ class Main {
     }
 
     /**
-     * The main method for Lab 4b. Reads data from file and then run a simulation
+     * The main method for DES+. Reads data from file and then run a simulation
      * based on the input data.
      *
-     * @param args two arguments, first an integer specifying number of servers in
-     *             the shop. Second a file containing a sequence of double values,
-     *             each being the arrival time of a customer (in any order).
+     * @param args specific settings for the simulator instance.
      */
     public static void main(String[] args) {
         createScanner(args)

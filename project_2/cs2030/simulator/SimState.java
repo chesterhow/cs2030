@@ -9,15 +9,13 @@ import java.util.function.Function;
  * components: (i) the event queue, (ii) the statistics, (iii) the shop (the
  * servers) and (iv) the event logs.
  *
- * @author atharvjoshi
- * @author weitsang
- * @version CS2030 AY19/20 Sem 1 Lab 7
+ * @version CS2030 AY19/20 Sem 1 DES+
  */
 public class SimState {
     /**
      * The Event class encapsulates information and methods pertaining to a
-     * Simulator event. Stores a lambda that denotes type of event - arrival or
-     * done.
+     * Simulator event. Stores a lambda that denotes type of event - arrival,
+     * done or endRest.
      */
     private class Event implements Comparable<Event> {
         /** The time this event occurs at. */
@@ -27,7 +25,7 @@ public class SimState {
         private Function<SimState, SimState> lambda;
 
         /**
-         * Creates an event and initializes it.
+         * Create and initialize a new event.
          * 
          * @param time The time of occurrence.
          * @param f    The function that this event will execute.
@@ -50,7 +48,7 @@ public class SimState {
         }
 
         /**
-         * Smulates this event by applying the lambda.
+         * Simulates this event by applying the lambda.
          *
          * @param state The current simulation state.
          * @return A new state of simulation.
@@ -72,20 +70,25 @@ public class SimState {
     /** The event logs. */
     private final String log;
 
-    /** The customer id. */
+    /** The last customer id. */
     private final int lastCustomerId;
 
+    /** The probability of a human server resting. */
     private final double restingProbability;
 
+    /** A RandomGenerator object. */
     private final RandomGenerator rng;
 
     /**
      * A private constructor of internal states.
      * 
-     * @param shop   The list of servers.
-     * @param stats  The statistics being kept.
-     * @param events A priority queue of events.
-     * @param log    A log of what's happened so far.
+     * @param shop               The list of servers.
+     * @param stats              The statistics being kept.
+     * @param events             A priority queue of events.
+     * @param log                A log of what's happened so far.
+     * @param lastCustomerId     The last customer id.
+     * @param restingProbability The probability of a human server resting.
+     * @param rng                A RandomGenerator object.
      */
     private SimState(Shop shop, Statistics stats, PriorityQueue<Event> events, String log,
             int lastCustomerId, double restingProbability, RandomGenerator rng) {
@@ -102,7 +105,14 @@ public class SimState {
     /**
      * Constructor for creating the simulation state from scratch.
      * 
-     * @param numOfServers The number of servers.
+     * @param seed               The seed for the RandomGenerator object.
+     * @param numOfServers       The number of human servers.
+     * @param numOfCounters      The number of self-checkout counters.
+     * @param maxQueueLength     The max length of each server's queue.
+     * @param arrivalRate        The arrival rate for the RandomGenerator object.
+     * @param serviceRate        The service rate for the RandomGenerator object.
+     * @param restingRate        The resting rate for the RandomGenerator object.
+     * @param restingProbability The probability of a human server resting.
      */
     public SimState(int seed, int numOfServers, int numOfCounters, int maxQueueLength,
             double arrivalRate, double serviceRate, double restingRate, double restingProbability) {
@@ -126,7 +136,7 @@ public class SimState {
     }
 
     /**
-     * Update a server of this simulations.
+     * Update a server of this simulation.
      * 
      * @param s The updated server to replace the existing one.
      * @return The new simulation state.
@@ -137,7 +147,7 @@ public class SimState {
     }
 
     /**
-     * Update the event queue of this simulations.
+     * Update the event queue of this simulation.
      * 
      * @param pq The priority queue to replace the existing one.
      * @return The new simulation state.
@@ -148,9 +158,9 @@ public class SimState {
     }
 
     /**
-     * Update the event log of this simulations.
+     * Update the event log of this simulation.
      * 
-     * @param s The log string to append to this event log.
+     * @param s The log string to append to the existing event log.
      * @return The new simulation state.
      */
     private SimState log(String s) {
@@ -159,7 +169,7 @@ public class SimState {
     }
 
     /**
-     * Update the last customer id of this simulations.
+     * Update the last customer id of this simulation.
      * 
      * @param id The updated last customer id.
      * @return The new simulation state.
@@ -172,8 +182,8 @@ public class SimState {
     /**
      * Add an event to the simulation's event queue.
      * 
-     * @param time   The time the event to be added occur.
-     * @param lambda How the state to be updated upon execution of this event.
+     * @param time   The time the event will occur.
+     * @param lambda The function that the event will execute.
      * @return The new simulation state.
      */
     public SimState addEvent(double time, Function<SimState, SimState> lambda) {
@@ -181,8 +191,8 @@ public class SimState {
     }
 
     /**
-     * Retrieve the next event with earliest time stamp from the priority queue, and
-     * a new state. If there is no more event, an Optional.empty will be returned.
+     * Retrieve the next event with earliest timestamp from the priority queue, and
+     * a new state. If there are no more events, an Optional.empty will be returned.
      * 
      * @return A pair object with an (optional) event and the new simulation state.
      */
@@ -191,6 +201,80 @@ public class SimState {
         return Pair.of(result.first, events(result.second));
     }
 
+    /**
+     * Called when a customer arrives in the simulation. This method updates the
+     * simulation logs.
+     * 
+     * @param time The time the customer arrives.
+     * @param c    The customer that arrrives.
+     * @return A new state of the simulation after the customer arrives.
+     */
+    public SimState noteArrival(double time, Customer c) {
+        return log(String.format("%.3f %s arrives\n", time, c));
+    }
+
+    /**
+     * Called when a customer joins a server's queue in the simulation. This method
+     * updates the simulation logs.
+     * 
+     * @param time The time the customer joins a server's queue.
+     * @param s    The server whose queue the customer joins.
+     * @param c    The customer that joins a server's queue.
+     * @return A new state of the simulation after the customer joins a server's queue.
+     */
+    public SimState noteWait(double time, Server s, Customer c) {
+        return log(String.format("%.3f %s waits to be served by %s\n", time, c, s));
+    }
+
+    /**
+     * Called when a customer is served in the simulation. This method updates the
+     * simulation logs and statistics.
+     * 
+     * @param time The time the customer is served.
+     * @param s    The server that serves the customer.
+     * @param c    The customer that is served.
+     * @return A new state of the simulation after the customer is served.
+     */
+    public SimState noteServed(double time, Server s, Customer c) {
+        return log(String.format("%.3f %s served by %s\n", time, c, s))
+            .stats(stats.serveOneCustomer()
+                .recordWaitingTime(c.timeWaited(time)));
+    }
+
+    /**
+     * Called when a customer is done being served in the simulation. This method updates
+     * the simulation logs.
+     * 
+     * @param time The time the customer is done being served.
+     * @param s    The server that serves the customer.
+     * @param c    The customer that is served.
+     * @return A new state of the simulation after the customer is done being served.
+     */
+    public SimState noteDone(double time, Server s, Customer c) {
+        return log(String.format("%.3f %s done serving by %s\n", time, c, s));
+    }
+
+    /**
+     * Called when a customer leaves the shops without service. This method updates the
+     * simulation logs and statistics.
+     * 
+     * @param time The time this customer leaves.
+     * @param c    The customer who leaves.
+     * @return A new state of the simulation.
+     */
+    public SimState noteLeave(double time, Customer c) {
+        return log(String.format("%.3f %s leaves\n", time, c))
+            .stats(stats.looseOneCustomer());
+    }
+
+    /**
+     * Generate arrival events and add them to the events queue. Arriving customers might
+     * be greedy, depending on the probability.
+     * 
+     * @param numOfCustomers    The number of customers to arrive.
+     * @param greedyProbability The probability of a customer being greedy.
+     * @return A new state of the simulation.
+     */
     public SimState generateArrivals(int numOfCustomers, double greedyProbability) {
         double time = 0;
         SimState state = this;
@@ -207,79 +291,15 @@ public class SimState {
     }
 
     /**
-     * Called when a customer arrived in the simulation.
+     * Simulates the logic of what happens when a customer arrives. The customer is
+     * either served, waits to be served, or leaves.
      * 
-     * @param time The time the customer arrives.
-     * @param c    The customer that arrrives.
-     * @return A new state of the simulation after the customer arrives.
-     */
-    public SimState noteArrival(double time, Customer c) {
-        return log(String.format("%.3f %s arrives\n", time, c));
-    }
-
-    /**
-     * Called when a customer arrived in the simulation. This methods update the
-     * logs of simulation.
-     * 
-     * @param time The time the customer arrives.
-     * @param c    The customer that arrrives.
-     * @return A new state of the simulation after the customer arrives.
-     */
-    public SimState noteWait(double time, Server s, Customer c) {
-        return log(String.format("%.3f %s waits to be served by %s\n", time, c, s));
-    }
-
-    /**
-     * Called when a customer is served in the simulation. This methods update the
-     * logs and the statistics of the simulation.
-     * 
-     * @param time The time the customer arrives.
-     * @param s    The server that serves the customer.
-     * @param c    The customer that is served.
-     * @return A new state of the simulation after the customer is served.
-     */
-    public SimState noteServed(double time, Server s, Customer c) {
-        return log(String.format("%.3f %s served by %s\n", time, c, s))
-            .stats(stats.serveOneCustomer()
-                .recordWaitingTime(c.timeWaited(time)));
-    }
-
-    /**
-     * Called when a customer is done being served in the simulation. This methods
-     * update the logs of the simulation.
-     * 
-     * @param time The time the customer arrives.
-     * @param s    The server that serves the customer.
-     * @param c    The customer that is served.
-     * @return A new state of the simulation after the customer is done being
-     *         served.
-     */
-    public SimState noteDone(double time, Server s, Customer c) {
-        return log(String.format("%.3f %s done serving by %s\n", time, c, s));
-    }
-
-    /**
-     * Called when a customer leaves the shops without service. Update the log and
-     * statistics.
-     * 
-     * @param time     The time this customer leaves.
-     * @param c The customer who leaves.
-     * @return A new state of the simulation.
-     */
-    public SimState noteLeave(double time, Customer c) {
-        return log(String.format("%.3f %s leaves\n", time, c))
-            .stats(stats.looseOneCustomer());
-    }
-
-    /**
-     * Simulates the logic of what happened when a customer arrives. The customer is
-     * either served, waiting to be served, or leaves.
-     * 
-     * @param time The time the customer arrives.
+     * @param time   The time the customer arrives.
+     * @param greedy Boolean indicating if the customer is greedy.
      * @return A new state of the simulation.
      */
     public SimState simulateArrival(double time, boolean greedy) {
-        Customer customer = new Customer(time, this.lastCustomerId, greedy);
+        Customer customer = new Customer(this.lastCustomerId, time, greedy);
 
         return noteArrival(time, customer)
             .id(this.lastCustomerId + 1)
@@ -287,7 +307,7 @@ public class SimState {
     }
 
     /**
-     * Handle the logic of finding idle servers to serve the customer, or a server
+     * Handle the logic of finding available servers to serve the customer, or a server
      * that the customer can wait for, or leave. Called from simulateArrival.
      * 
      * @param time     The time the customer arrives.
@@ -306,8 +326,8 @@ public class SimState {
     }
 
     /**
-     * Simulates the logic of what happened when a customer is done being served.
-     * The server either serve the next customer or becomes idle.
+     * Simulates the logic of what happens when a customer is done being served.
+     * The server either serves the next customer, rests (if human), or becomes available.
      * 
      * @param time     The time the service is done.
      * @param server   The server serving the customer.
@@ -347,6 +367,15 @@ public class SimState {
             .addEvent(doneTime, state -> state.simulateDone(doneTime, server, customer));
     }
 
+    /**
+     * Handle the logic of a human server taking a rest. A new end rest event is
+     * generated and scheduled.
+     * 
+     * @param time     The time the server goes to rest.
+     * @param server   The server serving this customer.
+     * @param customer The customer being served.
+     * @return A new state of the simulation.
+     */
     public SimState restServer(double time, HumanServer server, Customer customer) {
         double restEndTime = time + this.rng.genRestPeriod();
 
@@ -355,6 +384,14 @@ public class SimState {
             .addEvent(restEndTime, state -> state.endServerRest(restEndTime, server));
     }
 
+    /**
+     * Handle the logic of a human server ending their rest. Serves next customer
+     * in queue (if any).
+     * 
+     * @param time   The time the server ends their rest.
+     * @param server The server ending the rest.
+     * @return A new state of the simulation.
+     */
     public SimState endServerRest(double time, HumanServer server) {
         return shop.find(s -> s.equals(server))
             .flatMap(s -> s.getNextWaitingCustomer())
@@ -365,7 +402,7 @@ public class SimState {
 
     /**
      * The main simulation loop. Repeatedly get events from the event queue,
-     * simulate and update the event. Return the final simulation state.
+     * simulates and updates the event. Return the final simulation state.
      * 
      * @return The final state of the simulation.
      */
@@ -380,7 +417,7 @@ public class SimState {
 
     /**
      * Return a string representation of the simulation state, which consists of all
-     * the logs and the stats.
+     * logs and stats.
      * 
      * @return A string representation of the simulation.
      */

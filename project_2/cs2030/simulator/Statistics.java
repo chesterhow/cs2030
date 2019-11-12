@@ -2,11 +2,10 @@ package cs2030.simulator;
 
 /**
  * This is an immutable class that stores stats about the simulation. In
- * particular, the average * waiting time, the number of customer who left, and
- * the number of customers who are served, are stored.
+ * particular, the average waiting time, the number of customers who are served,
+ * and the number of customer who left are stored.
  *
- * @author Ooi Wei Tsang
- * @version CS2030 AY19/20 Sem 1 Lab 7
+ * @version CS2030 AY19/20 Sem 1 DES+
  */
 class Statistics {
     /** Sum of time spent waiting for all customers. */
@@ -18,6 +17,9 @@ class Statistics {
     /** Total number of customers who left without being served. */
     private final int totalNumOfLostCustomer;
 
+    /**
+     * Create and intialize a new Statistics object.
+     */
     public Statistics() {
         this.totalWaitingTime = 0;
         this.totalNumOfServedCustomer = 0;
@@ -25,11 +27,11 @@ class Statistics {
     }
 
     /**
-     * Constructor for a new Statistics object.
+     * Private constructor for a new Statistics object.
      * 
-     * @param totalWaitingTime         the total waiting time so far.
-     * @param totalNumOfServedCustomer the number of customers served so far.
-     * @param totalNumOfLostCustomer   the number of customers left.
+     * @param totalWaitingTime         The total waiting time.
+     * @param totalNumOfServedCustomer The number of customers served.
+     * @param totalNumOfLostCustomer   The number of customers left.
      */
     private Statistics(double waitTime, int servedCustomers, int lostCustomers) {
         this.totalWaitingTime = waitTime;
@@ -40,7 +42,7 @@ class Statistics {
     /**
      * Mark that a customer is served.
      * 
-     * @return A new Statistics object with updated stats
+     * @return A new Statistics object with updated stats.
      */
     public Statistics serveOneCustomer() {
         return new Statistics(this.totalWaitingTime, this.totalNumOfServedCustomer + 1,
@@ -50,7 +52,7 @@ class Statistics {
     /**
      * Mark that a customer is lost.
      * 
-     * @return A new Statistics object with updated stats
+     * @return A new Statistics object with updated stats.
      */
     public Statistics looseOneCustomer() {
         return new Statistics(this.totalWaitingTime, this.totalNumOfServedCustomer,
@@ -61,7 +63,7 @@ class Statistics {
      * Accumulate the waiting time of a customer.
      * 
      * @param time The time a customer waited.
-     * @return A new Statistics object with updated stats
+     * @return A new Statistics object with updated stats.
      */
     public Statistics recordWaitingTime(double time) {
         return new Statistics(this.totalWaitingTime + time, this.totalNumOfServedCustomer,
@@ -69,11 +71,11 @@ class Statistics {
     }
 
     /**
-     * Return a string representation of the staistics collected.
+     * Return a string representation of the statistics collected.
      * 
-     * @return A string containing three numbers: the average waiting time, followed
-     *         by the number of served customer, followed by the number of lost
-     *         customer.
+     * @return A string containing three numbers: the average waiting time,
+     *         followed by the number of served customers,
+     *         followed by the number of lost customers.
      */
     public String toString() {
         return String.format("[%.3f %d %d]", (totalNumOfServedCustomer == 0 ? 

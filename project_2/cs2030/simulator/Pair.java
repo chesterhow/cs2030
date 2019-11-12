@@ -4,18 +4,21 @@ package cs2030.simulator;
  * This utility class stores two items together in a pair. It could be used, for
  * instance, to faciliate returning of two values in a function.
  *
- * @author Ooi Wei Tsang
- * @version CS2030 AY19/20 Sem 1 Lab 7
+ * @version CS2030 AY19/20 Sem 1 DES+
  **/
 public final class Pair<T, U> {
     /** First item in the pair. */
     public T first;
+
     /** Second item in the pair. */
     public U second;
 
     /**
      * A private constructor for a new pair.
-     **/
+     * 
+     * @param t First item in the pair.
+     * @param u Second item in the pair.
+     */
     private Pair(T t, U u) {
         this.first = t;
         this.second = u;
